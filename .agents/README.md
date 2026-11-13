@@ -8,7 +8,7 @@
 | `memory/` | 架构与数据流、决策记录 | [architecture.md](./memory/architecture.md) · [decisions.md](./memory/decisions.md) |
 | `workflows/` | 多步骤流程 | [verify.md](./workflows/verify.md) |
 | `commands/` | 可复用命令 | [common.md](./commands/common.md) |
-| `skills/` | 可复用的操作说明 | [troubleshooting.md](./skills/troubleshooting.md) |
+| `skills/` | 可复用的操作说明 | [troubleshooting.md](./skills/troubleshooting.md) · [writing-style.md](./skills/writing-style.md) |
 
 暂未使用：`prompts/`（本地自用，不入库）、`tools/`（无 MCP 集成）。
 
