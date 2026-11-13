@@ -4,6 +4,23 @@
 `package.json` 里没有 build 与 dependencies。
 
 ## 首次安装
+
+**方式一：GitHub Packages**
+
+包名带 scope，先让 npm 认识这个源（`_authToken` 用有 `read:packages` 权限的 PAT；仓库 public 时可省）：
+
+```
+@ylovexln:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=<你的 PAT>
+```
+
+```bash
+npm i @ylovexln/karin-plugin-astrbot-bridge
+```
+装到 Karin 的插件目录（或全局 node_modules）后重启 Karin。包内已带面板产物 `web-dist/`，不用构建。
+
+**方式二：zip**
+
 1. Karin WebUI → 插件管理 → 安装插件 → 上传 `dist/karin-plugin-astrbot-bridge-v0.0.1.zip`
 2. 重启 Karin
 3. 自检：

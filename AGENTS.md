@@ -28,6 +28,9 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 8. **只写自己的目录**（`__ASTRBOT_BRIDGE_DIR || pluginRoot()`），一次性产物用完即删。
 9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前统一 **0.0.1**。
 10. **打包只用 `npm run pack`**（Node 标准库，不依赖 Python）；`dist/` 必须同时有 zip 与同名解压副本。
+    **npm 发布只发 GitHub Packages（`v*` tag 触发 `releases.yml`）**：包名带 scope `@ylovexln/`，
+    权限只能 `contents: read` + `packages: write`（加 `id-token` 会让 npm 走 OIDC 直接 ENEEDAUTH）；
+    `files` 白名单必须含 `web-dist`，否则装上去面板是空壳。
 11. **面板不引运行时依赖**：`web-dist/` 是纯静态产物，装插件的人不需要 npm。
 12. **路径前缀三处必须一致**：`web/vite.config.mjs` 的 `base`、`sendAsset` 截 `/assets/` 之后的部分、`web.config.js` 的 `page.url`。
 

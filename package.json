@@ -21,6 +21,17 @@
     "README.md",
     "INSTALL.md"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YlovexLN/karin-plugin-astrbot-bridge.git"
+  },
+  "homepage": "https://github.com/YlovexLN/karin-plugin-astrbot-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/YlovexLN/karin-plugin-astrbot-bridge/issues"
+  },
   "keywords": [
     "karin",
     "karin-plugin",
@@ -28,6 +39,11 @@
     "bridge",
     "agent"
   ],
+  "author": {
+    "name": "YlovexLN",
+    "email": "ylovexln@foxmail.com",
+    "url": "https://github.com/YlovexLN"
+  },
   "license": "AGPL-3.0-only",
   "scripts": {
     "build": "node scripts/pack.mjs",

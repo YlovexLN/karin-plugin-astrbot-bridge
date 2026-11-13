@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (C) 2026 YlovexLN
+
 /**
  * 把本插件打成 dist/<name>.zip，并在 dist/<name>/ 留一份解压好的，
  * 方便直接拷贝文件夹安装。

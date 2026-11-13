@@ -1,0 +1,110 @@
+# 单源发布：GitHub Packages（scoped 包名 @ylovexln/karin-plugin-astrbot-bridge）
+#
+# 照搬姊妹仓库 karin-plugin-selfmsg 的「github-packages」那个 job，并去掉了它必须绕开的一个坑：
+# selfmsg 要同时发 npmjs，所以整条流程拆成两个 job 隔离权限；
+# 本仓库只发 GitHub Packages，**不能有 id-token: write** ——
+# npm 11 只要看到 OIDC 能力，就对这个源先做 token exchange，
+# 而 GitHub Packages 没有 /-/npm/v1/oidc/token/exchange（404），随后直接 ENEEDAUTH，
+# 也不会回退 NODE_AUTH_TOKEN。所以这里的权限只有 contents: read + packages: write。
+#
+# 其余规则与 selfmsg 一致：
+# - 推 v* tag 即发布；也可以手动触发
+# - 校验 tag 与 package.json 的 version 一致 → 构建面板 → 冒烟测试 → 推导 dist-tag
+# - 发布前查该版本是否已存在，重跑自动跳过
+# - 预发布版本（带 -）发到 beta/rc 等 dist-tag，不占 latest
+
+name: publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  github-packages:
+    name: 发布到 GitHub Packages
+    runs-on: ubuntu-latest
+    if: github.repository == 'YlovexLN/karin-plugin-astrbot-bridge'
+    permissions:
+      contents: read
+      packages: write
+      # 刻意不给 id-token：给了 npm 会走 OIDC 并失败，见文件顶部说明
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 校验 tag 与 package.json 版本一致
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER="$(node -p "require('./package.json').version")"
+          [ "$TAG" = "$VER" ] || { echo "::error::tag $TAG 与版本 $VER 不一致"; exit 1; }
+          echo "version=$VER"
+
+      # 面板产物不进 git（.gitignore 里），检出时不存在，必须现场构建
+      - name: 构建面板
+        run: |
+          set -e
+          npm ci
+          npm run build:web
+          test -f web-dist/index.html || { echo "::error::web-dist 构建失败"; exit 1; }
+
+      - name: 冒烟测试
+        run: node scripts/test.mjs
+
+      # GitHub Packages 对不存在的包返回 401（不是 404），按未发布处理
+      - name: 检查 GitHub Packages 上是否已存在
+        id: state
+        run: |
+          VER="$(node -p "require('./package.json').version")"
+          CODE=$(curl -s -o /tmp/gh-pkg.json -w '%{http_code}' \
+            -H "Authorization: Bearer $NODE_AUTH_TOKEN" \
+            -H "Accept: application/vnd.npm.install-v1+json" \
+            "https://npm.pkg.github.com/@ylovexln%2Fkarin-plugin-astrbot-bridge")
+          case "$CODE" in
+            200)
+              if node -e "const p=require('/tmp/gh-pkg.json');process.exit(p.versions&&p.versions['$VER']?0:1)"; then
+                echo "needed=false" >> "$GITHUB_OUTPUT"; echo "已存在，跳过"
+              else
+                echo "needed=true" >> "$GITHUB_OUTPUT"; echo "未发布"
+              fi
+              ;;
+            404|401|403)
+              echo "needed=true" >> "$GITHUB_OUTPUT"; echo "未发布（HTTP $CODE）"
+              ;;
+            *) echo "::error::GitHub Packages 状态查询失败（HTTP $CODE）"; exit 1 ;;
+          esac
+
+      - name: 清理 manifest
+        run: |
+          npm pkg delete devDependencies
+          npm pkg delete scripts
+
+      - name: 推导 dist-tag
+        id: dist
+        run: |
+          VER="$(node -p "require('./package.json').version")"
+          case "$VER" in
+            *-*) DIST_TAG="${VER#*-}"; DIST_TAG="${DIST_TAG%%.*}" ;;
+            *)   DIST_TAG="latest" ;;
+          esac
+          echo "value=$DIST_TAG" >> "$GITHUB_OUTPUT"
+          echo "dist-tag=$DIST_TAG"
+
+      - name: 发布
+        if: steps.state.outputs.needed == 'true'
+        run: |
+          npm pkg set name="@ylovexln/karin-plugin-astrbot-bridge"
+          # setup-node 只写了默认源的映射，GitHub Packages 需要自己补一行
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> "$HOME/.npmrc"
+          npm publish --registry=https://npm.pkg.github.com \
+            --tag "${{ steps.dist.outputs.value }}" --loglevel=http

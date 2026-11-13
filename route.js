@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (C) 2026 YlovexLN
+
 import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'

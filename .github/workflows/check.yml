@@ -23,6 +23,11 @@ jobs:
             node --check "$f"
           done
 
+      - name: 构建面板
+        run: |
+          npm ci
+          npm run build:web
+
       - name: 冒烟测试
         run: node scripts/test.mjs
 
@@ -34,5 +39,9 @@ jobs:
             if (!pkg.karin) throw new Error('package.json 缺少 karin 字段')
             if (!pkg.main) throw new Error('package.json 缺少 main 字段')
             if (pkg.license !== 'AGPL-3.0-only') throw new Error('license 必须是 AGPL-3.0-only')
+            if (pkg.dependencies) throw new Error('运行时不允许 dependencies（零依赖）')
+            for (const f of ['index.js', 'dir.js', 'route.js', 'web.config.js', 'web-dist', 'LICENSE']) {
+              if (!pkg.files.includes(f)) throw new Error('files 白名单缺少 ' + f)
+            }
             console.log('package.json OK:', pkg.name, pkg.version)
           "
