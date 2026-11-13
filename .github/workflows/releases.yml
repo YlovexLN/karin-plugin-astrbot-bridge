@@ -96,9 +96,12 @@ jobs:
         id: dist
         run: |
           VER="$(node -p "require('./package.json').version")"
+          # 带预发布后缀（1.2.3-beta.1）→ beta 通道；正式版本才落在 latest。
+          # npm 的 `npm publish` 不会自动挪 latest，但这里显式判定，避免 beta 抢走默认安装版本。
           case "$VER" in
-            *-*) DIST_TAG="${VER#*-}"; DIST_TAG="${DIST_TAG%%.*}" ;;
-            *)   DIST_TAG="latest" ;;
+            *-beta*)   DIST_TAG="beta" ;;
+            *-*)       DIST_TAG="next" ;;
+            *)         DIST_TAG="latest" ;;
           esac
           echo "value=$DIST_TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VER dist-tag=$DIST_TAG"
