@@ -149,7 +149,7 @@ YlovexLN · [GitHub](https://github.com/YlovexLN) · [ylovexln@foxmail.com](mail
 
 ## 致谢
 
-- 代码与文档由 **DeepSeekRuntime** 配合 **DeepSeek-V4.1-Flash** 模型编写；需求、部署与实测由作者完成。
+- 代码与文档由 **DeepSeekRuntime**（DeepSeek harness）配合 **DeepSeek-V4.1-Flash** 模型编写；需求、部署与实测由作者完成。
 - WebUI 的布局与交互参照 [karin-plugin-kkk](https://github.com/ikenxuan/karin-plugin-kkk) 的面板。
 - 具体要暴露哪些能力（插件清单、指令、链接卡片、日志）来自 [AstrBot](https://github.com/AstrBotDevs/AstrBot) 侧的实际需求。
 
