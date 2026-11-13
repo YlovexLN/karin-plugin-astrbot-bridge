@@ -46,7 +46,8 @@ index.js  dir.js  route.js  web.config.js  web-dist/  LICENSE  README.md  INSTAL
 
 **`web-dist/` 必须进包** —— 面板产物不随 `npm install` 构建，缺了插件卡片就是个 574 字节的提示页
 （"找不到 web-dist"）。它在 git 里被忽略，CI 检出时不存在，所以工作流会先 `npm ci && npm run build:web`
-（失败即中止）再打包。
+（失败即中止）再打包。仓库不带 `package-lock.json`，所以用的是 `npm install` 而不是 `npm ci`；
+想用 `npm ci` 请先把 lockfile 提交进仓库。
 
 ## CI 步骤
 

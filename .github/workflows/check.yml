@@ -25,7 +25,7 @@ jobs:
 
       - name: 构建面板
         run: |
-          npm ci
+          npm install --no-audit --no-fund
           npm run build:web
 
       - name: 冒烟测试

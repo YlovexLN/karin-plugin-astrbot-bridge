@@ -54,7 +54,8 @@ jobs:
       - name: 构建面板
         run: |
           set -e
-          npm ci
+          # 仓库不带 lockfile，这里只能用 install（要 ci 就先提交 package-lock.json）
+          npm install --no-audit --no-fund
           npm run build:web
           test -f web-dist/index.html || { echo "::error::web-dist 构建失败"; exit 1; }
 
