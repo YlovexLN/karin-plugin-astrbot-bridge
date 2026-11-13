@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/astrbot/<action>`。
-定位、接口表、安装见 [README.md](./README.md)；本文只写维护这个仓库需要知道的规矩。
+定位、接口表、安装见 [README.md](./README.md) 与 [INSTALL.md](./INSTALL.md)；本文只写维护这个仓库需要知道的规矩。
 
 | 位置 | 内容 |
 | --- | --- |
@@ -12,7 +12,7 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 | `web.config.js` | 插件卡片：`info` / `page`（指向 `/api/v1/astrbot/page` 的 iframe）/ `components` / `save()` |
 | `web/` → `web-dist/` | React 面板源码与构建产物（`web-dist/` 要进插件目录） |
 | `scripts/pack.mjs` | 打 zip + 解压副本到 `dist/` |
-| `scripts/test.mjs` | 冒烟测试，零依赖（桩件 `node_modules/node-karin`），25 项断言 |
+| `scripts/test.mjs` | 冒烟测试，零依赖（桩件 `node_modules/node-karin`），27 项断言 |
 | `docs/` | 面向使用者的文档：install / config / publish |
 | `.github/workflows/check.yml` | 推送时语法检查 + 冒烟测试 + package.json 契约 |
 | `.agents/` | 维护者文档，入口 [`.agents/README.md`](./.agents/README.md) |
@@ -27,7 +27,7 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 6. **指令表带 15 s TTL 且要能自愈**；不要自己 import `node_modules/node-karin/dist/*.mjs` 造缓存（会拿到另一份空模块实例）。
 7. **降级吞异常**：日志、`web.config`、README 扫描一律 try/catch，拿不到就少字段——一次 500 会让 AstrBot 整条链路报错。
 8. **只写自己的目录**（`__ASTRBOT_BRIDGE_DIR || pluginRoot()`），一次性产物用完即删。
-9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前统一 **0.0.1**。
+9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前为 **0.0.2-beta.1**。
 10. **打包只用 `npm run pack`**（Node 标准库，不依赖 Python）；`dist/` 必须同时有 zip 与同名解压副本。
     **npm 双源发布**（`v*` tag 触发 `releases.yml`）：npmjs 用无 scope 名 `karin-plugin-astrbot-bridge` +
     Trusted Publishing（要 `id-token: write`）；GitHub Packages 用 `@ylovexln/` 前缀 + `GITHUB_TOKEN`
@@ -36,7 +36,7 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 11. **面板不引运行时依赖**：`web-dist/` 是纯静态产物，装插件的人不需要 npm。
 12. **路径前缀三处必须一致**：`web/vite.config.mjs` 的 `base`、`sendAsset` 截 `/assets/` 之后的部分、`web.config.js` 的 `page.url`。
 
-细节：1–7 见 [`.agents/rules/invariants.md`](./.agents/rules/invariants.md)，8–11 见 [`.agents/rules/workspace.md`](./.agents/rules/workspace.md)。
+细节：1–7 见 [`.agents/rules/invariants.md`](./.agents/rules/invariants.md)，8–12 见 [`.agents/rules/workspace.md`](./.agents/rules/workspace.md)。
 
 ## 影响面
 
