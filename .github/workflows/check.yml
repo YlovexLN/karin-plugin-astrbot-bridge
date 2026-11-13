@@ -18,7 +18,7 @@ jobs:
       - name: 语法检查
         run: |
           set -e
-          for f in index.js dir.js route.js web.config.js scripts/*.mjs; do
+          for f in index.js apps.js dir.js route.js web.config.js scripts/*.mjs; do
             echo "check $f"
             node --check "$f"
           done
@@ -37,10 +37,12 @@ jobs:
             const fs = require('node:fs')
             const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
             if (!pkg.karin) throw new Error('package.json 缺少 karin 字段')
+            if (!pkg.karin.apps) throw new Error('package.json 缺少 karin.apps（npm 类型插件不会被加载）')
+            if (!fs.existsSync(String(pkg.karin.apps).replace(/^\.\//, ''))) throw new Error('karin.apps 指向的文件不存在')
             if (!pkg.main) throw new Error('package.json 缺少 main 字段')
             if (pkg.license !== 'AGPL-3.0-only') throw new Error('license 必须是 AGPL-3.0-only')
             if (pkg.dependencies) throw new Error('运行时不允许 dependencies（零依赖）')
-            for (const f of ['index.js', 'dir.js', 'route.js', 'web.config.js', 'web-dist', 'LICENSE']) {
+            for (const f of ['index.js', 'apps.js', 'dir.js', 'route.js', 'web.config.js', 'web-dist', 'LICENSE']) {
               if (!pkg.files.includes(f)) throw new Error('files 白名单缺少 ' + f)
             }
             if (!fs.existsSync('package-lock.json')) throw new Error('缺少 package-lock.json（CI 用 npm ci）')

@@ -4,7 +4,8 @@
 只把 Karin 里「装了哪些插件、有哪些指令、能不能执行、结果是什么」摊成 JSON 接口。
 
 - 版本 0.0.1 · 端口跟 Karin 的 HTTP 口（默认 7777）· 前缀 `/api/v1/astrbot/`
-- 安装：Karin WebUI 上传 `dist/*.zip`，或 `npm i @ylovexln/karin-plugin-astrbot-bridge`（GitHub Packages，需认证，见 [INSTALL.md](./INSTALL.md)）
+- 安装：`npm i karin-plugin-astrbot-bridge`（npmjs 官包，无需认证），或打 zip 上传 → 重启 Karin
+  详见 [INSTALL.md](./INSTALL.md)
 - 令牌**不用单独配置**，直接认 Karin 的 `HTTP_AUTH_KEY`（WebUI 登录令牌）
 - 十七个 action。业务接口一律 `POST /api/v1/astrbot/<action>` + `Authorization: Bearer <HTTP_AUTH_KEY>`
   （body 里写 `{"action":"..."}` 也行，URL 段优先）；只有 `page`/`assets` 是 `GET` + `?token=`——iframe 发不出请求头

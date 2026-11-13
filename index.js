@@ -42,7 +42,13 @@ const dispatchByUrl = (req) => {
  * 官方规范（1.9.10+）：加载 main 入口 → 执行它导出的 KARIN_PLUGIN_INIT → 再加载 apps。
  * 挂载放到这里执行，时机与规范一致；早先放在模块顶层也能用，这里按规范改。
  */
+let mounted = false
+
 export const KARIN_PLUGIN_INIT = async () => {
+  /** apps.js 也导出这个函数；npm 类型插件会先执行 main 的 INIT、再加载 apps，挡掉第二次 */
+  if (mounted) return
+  mounted = true
+
   if (bridgeRouter && typeof bridgeRouter.use === 'function') {
     bridgeRouter.use('/astrbot', async (req, res, next) => {
       const wrapped = {

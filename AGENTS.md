@@ -5,13 +5,14 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 
 | 位置 | 内容 |
 | --- | --- |
-| `index.js` | 插件入口，在 `KARIN_PLUGIN_INIT` 里 `router.use('/astrbot', handler)` |
+| `index.js` | 插件入口，在 `KARIN_PLUGIN_INIT` 里 `router.use('/astrbot', handler)`（`mounted` 标记保证幂等） |
+| `apps.js` | 只做 `export { KARIN_PLUGIN_INIT } from './index.js'`——npm 类型插件必须靠 `karin.apps` 才会被加载 |
 | `dir.js` | 路径常量：`PluginDir` / `PluginName` / `WebDistDir` |
 | `route.js` | 各 action 的实现，单文件无内部依赖（`page`/`assets` 在 handler 里先处理，共十七个） |
 | `web.config.js` | 插件卡片：`info` / `page`（指向 `/api/v1/astrbot/page` 的 iframe）/ `components` / `save()` |
 | `web/` → `web-dist/` | React 面板源码与构建产物（`web-dist/` 要进插件目录） |
 | `scripts/pack.mjs` | 打 zip + 解压副本到 `dist/` |
-| `scripts/test.mjs` | 冒烟测试，零依赖（桩件 `node_modules/node-karin`），24 项断言 |
+| `scripts/test.mjs` | 冒烟测试，零依赖（桩件 `node_modules/node-karin`），25 项断言 |
 | `docs/` | 面向使用者的文档：install / config / publish |
 | `.github/workflows/check.yml` | 推送时语法检查 + 冒烟测试 + package.json 契约 |
 | `.agents/` | 维护者文档，入口 [`.agents/README.md`](./.agents/README.md) |
@@ -28,9 +29,10 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 8. **只写自己的目录**（`__ASTRBOT_BRIDGE_DIR || pluginRoot()`），一次性产物用完即删。
 9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前统一 **0.0.1**。
 10. **打包只用 `npm run pack`**（Node 标准库，不依赖 Python）；`dist/` 必须同时有 zip 与同名解压副本。
-    **npm 发布只发 GitHub Packages（`v*` tag 触发 `releases.yml`）**：包名带 scope `@ylovexln/`，
-    权限只能 `contents: read` + `packages: write`（加 `id-token` 会让 npm 走 OIDC 直接 ENEEDAUTH）；
-    `files` 白名单必须含 `web-dist`，否则装上去面板是空壳。
+    **npm 双源发布**（`v*` tag 触发 `releases.yml`）：npmjs 用无 scope 名 `karin-plugin-astrbot-bridge` +
+    Trusted Publishing（要 `id-token: write`）；GitHub Packages 用 `@ylovexln/` 前缀 + `GITHUB_TOKEN`
+    （**绝不能给 id-token**，npm 会走 OIDC 直接 ENEEDAUTH）。两个 job 必须分开。
+    `files` 白名单必须含 `web-dist`，否则装上去面板是空壳；`karin.apps` 必须声明，否则 npm 装不上。
 11. **面板不引运行时依赖**：`web-dist/` 是纯静态产物，装插件的人不需要 npm。
 12. **路径前缀三处必须一致**：`web/vite.config.mjs` 的 `base`、`sendAsset` 截 `/assets/` 之后的部分、`web.config.js` 的 `page.url`。
 
@@ -64,7 +66,7 @@ curl -X POST http://<Karin 主机>:7777/api/v1/restart -H 'Authorization: Bearer
 
 ## 提交前自检
 
-- `node --check index.js && node --check route.js && node --check web.config.js`
+- `node --check index.js && node --check apps.js && node --check route.js && node --check web.config.js`
 - `npm run pack`：zip 与解压副本都在，字节数合理
 - 改了 action：README 接口表、`dispatch` 默认错误里的 action 列表、AstrBot 侧工具数三处同步
 - 没有新增 `dependencies`，没有硬编码令牌，没有残留 `_*`/`*.tmp`/`*.bak`

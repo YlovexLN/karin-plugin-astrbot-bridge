@@ -9,10 +9,12 @@
     "karin": ">=1.8.0"
   },
   "karin": {
-    "web": "./web.config.js"
+    "web": "./web.config.js",
+    "apps": "./apps.js"
   },
   "files": [
     "index.js",
+    "apps.js",
     "dir.js",
     "route.js",
     "web.config.js",

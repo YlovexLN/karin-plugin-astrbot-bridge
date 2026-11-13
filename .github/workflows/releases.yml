@@ -1,18 +1,19 @@
-# 单源发布：GitHub Packages（scoped 包名 @ylovexln/karin-plugin-astrbot-bridge）
+# 双源发布：npmjs.com（无 scope）+ GitHub Packages（scoped）
 #
-# 照搬姊妹仓库 karin-plugin-selfmsg 的「github-packages」那个 job，并去掉了它必须绕开的一个坑：
-# selfmsg 要同时发 npmjs，所以整条流程拆成两个 job 隔离权限；
-# 本仓库只发 GitHub Packages，**不能有 id-token: write** ——
-# npm 11 只要看到 OIDC 能力，就对这个源先做 token exchange，
-# 而 GitHub Packages 没有 /-/npm/v1/oidc/token/exchange（404），随后直接 ENEEDAUTH，
-# 也不会回退 NODE_AUTH_TOKEN。所以这里的权限只有 contents: read + packages: write。
+# 拆成两个 job，原因是权限必须隔离：
+#   npmjs job           需要 id-token: write（Trusted Publishing 走 OIDC）
+#   GitHub Packages job 绝对不能有 id-token
+#     —— 有的话 npm 11 会先尝试 OIDC 换凭据，POST 到 GitHub 的
+#        /-/npm/v1/oidc/token/exchange 得到 404，然后直接 ENEEDAUTH，
+#        也不会回退到 NODE_AUTH_TOKEN。
 #
-# 其余规则与 selfmsg 一致：
+# 其余规则：
 # - 推 v* tag 即发布；也可以手动触发
 # - 校验 tag 与 package.json 的 version 一致 → 构建面板 → 冒烟测试 → 推导 dist-tag
 # - 发布前查该版本是否已存在，重跑自动跳过
 # - 预发布版本（带 -）发到 beta/rc 等 dist-tag，不占 latest
-
+# - 包名分两个：GitHub Packages 强制 \`@owner/\` 前缀，发布前用 npm pkg set 临时改
+# - 仓库里的 package.json 不带作用域，npmjs 上就叫 karin-plugin-astrbot-bridge
 name: publish
 
 on:
@@ -26,9 +27,93 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  npmjs:
+    name: 发布到 npmjs.com
+    runs-on: ubuntu-latest
+    if: github.repository == 'YlovexLN/karin-plugin-astrbot-bridge'
+    permissions:
+      contents: read
+      id-token: write # Trusted Publishing 必需
+    steps:
+      - uses: actions/checkout@v4
+
+      # Trusted Publishing 要求 npm >= 11.5，node 24 自带 npm 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: 确认 npm 版本支持 OIDC
+        run: |
+          VER="$(npm --version)"
+          echo "npm $VER"
+          if [ "$(printf '%s\n' 11.5.0 "$VER" | sort -V | head -n1)" != "11.5.0" ]; then
+            echo "::error::npm $VER 低于 11.5.0，不支持 Trusted Publishing"
+            exit 1
+          fi
+
+      - name: 校验 tag 与 package.json 版本一致
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER="$(node -p "require('./package.json').version")"
+          echo "tag=$TAG package.json=$VER"
+          if [ "$TAG" != "$VER" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} 与 package.json 版本 ${VER} 不一致"
+            exit 1
+          fi
+
+      # 面板产物 web-dist/ 在 .gitignore 里，克隆下来是空的 —— 发布前必须自己构建
+      - name: 构建面板
+        run: |
+          set -e
+          npm ci --no-audit --no-fund
+          npm run build:web
+          test -f web-dist/index.html || { echo "::error::web-dist 构建失败"; exit 1; }
+
+      - name: 冒烟测试
+        run: node scripts/test.mjs
+
+      # 幂等：已发布就跳过，重跑同一 tag 不会红在 E403
+      - name: 检查 npmjs 上是否已存在
+        id: state
+        run: |
+          VER="$(node -p "require('./package.json').version")"
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+            "https://registry.npmjs.org/karin-plugin-astrbot-bridge/$VER")
+          case "$CODE" in
+            200) echo "needed=false" >> "$GITHUB_OUTPUT"; echo "已存在，跳过" ;;
+            404) echo "needed=true"  >> "$GITHUB_OUTPUT"; echo "未发布" ;;
+            *) echo "::error::npmjs 状态查询失败（HTTP $CODE）"; exit 1 ;;
+          esac
+
+      # 剥离开发字段，让 npm 上的 manifest 只留运行时信息
+      - name: 清理 manifest
+        run: |
+          npm pkg delete devDependencies
+          npm pkg delete scripts
+
+      - name: 推导 dist-tag
+        id: dist
+        run: |
+          VER="$(node -p "require('./package.json').version")"
+          case "$VER" in
+            *-*) DIST_TAG="${VER#*-}"; DIST_TAG="${DIST_TAG%%.*}" ;;
+            *)   DIST_TAG="latest" ;;
+          esac
+          echo "value=$DIST_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VER dist-tag=$DIST_TAG"
+
+      # OIDC：不带 NODE_AUTH_TOKEN，provenance 由 npm 自动生成
+      - name: 发布
+        if: steps.state.outputs.needed == 'true'
+        run: |
+          npm publish --registry=https://registry.npmjs.org \
+            --tag "${{ steps.dist.outputs.value }}"
+
   github-packages:
     name: 发布到 GitHub Packages
     runs-on: ubuntu-latest
+    needs: [npmjs]
     if: github.repository == 'YlovexLN/karin-plugin-astrbot-bridge'
     permissions:
       contents: read
@@ -50,16 +135,12 @@ jobs:
           [ "$TAG" = "$VER" ] || { echo "::error::tag $TAG 与版本 $VER 不一致"; exit 1; }
           echo "version=$VER"
 
-      # 面板产物不进 git（.gitignore 里），检出时不存在，必须现场构建
       - name: 构建面板
         run: |
           set -e
           npm ci --no-audit --no-fund
           npm run build:web
           test -f web-dist/index.html || { echo "::error::web-dist 构建失败"; exit 1; }
-
-      - name: 冒烟测试
-        run: node scripts/test.mjs
 
       # GitHub Packages 对不存在的包返回 401（不是 404），按未发布处理
       - name: 检查 GitHub Packages 上是否已存在

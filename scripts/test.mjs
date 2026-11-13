@@ -142,9 +142,12 @@ const { astrbotBridgeHandler } = route
 {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
   check('package.json 有 karin.web', typeof pkg.karin?.web === 'string')
+  /** npm 类型插件只有声明了 karin.apps，Karin 才会加载它的 apps 文件（getNpmInfo 里 !pkg.karin?.apps?.length 直接返回空 apps） */
+  check('package.json 有 karin.apps（npm 安装必需）', typeof pkg.karin?.apps === 'string' && pkg.karin.apps.length > 0, String(pkg.karin?.apps))
+  check('karin.apps 指向的文件存在', existsSync(join(root, String(pkg.karin?.apps || '').replace(/^\.\//, '') || '__none__')))
   check('许可证是 AGPL-3.0-only', pkg.license === 'AGPL-3.0-only', pkg.license)
   check('LICENSE 文件存在', existsSync(join(root, 'LICENSE')))
-  for (const need of ['index.js', 'dir.js', 'route.js', 'web.config.js']) {
+  for (const need of ['index.js', 'apps.js', 'dir.js', 'route.js', 'web.config.js']) {
     check(`files 白名单含 ${need}`, pkg.files.some((f) => f === need))
   }
   check('dir.js 在磁盘上', existsSync(join(root, 'dir.js')))
