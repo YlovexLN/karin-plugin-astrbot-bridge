@@ -113,7 +113,6 @@ jobs:
   github-packages:
     name: 发布到 GitHub Packages
     runs-on: ubuntu-latest
-    needs: [npmjs]
     if: github.repository == 'YlovexLN/karin-plugin-astrbot-bridge'
     permissions:
       contents: read
