@@ -25,7 +25,7 @@ jobs:
 
       - name: 构建面板
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build:web
 
       - name: 冒烟测试
@@ -43,5 +43,6 @@ jobs:
             for (const f of ['index.js', 'dir.js', 'route.js', 'web.config.js', 'web-dist', 'LICENSE']) {
               if (!pkg.files.includes(f)) throw new Error('files 白名单缺少 ' + f)
             }
+            if (!fs.existsSync('package-lock.json')) throw new Error('缺少 package-lock.json（CI 用 npm ci）')
             console.log('package.json OK:', pkg.name, pkg.version)
           "
