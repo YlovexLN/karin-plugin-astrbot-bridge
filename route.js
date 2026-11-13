@@ -12,7 +12,7 @@ import { PluginDir } from './dir.js'
  * 构建标记：每次改完代码都换一次，配合日志里的 `[astrbot-bridge] action=… build=…`
  * 一眼看出容器里跑的是不是刚写进去的那份（Karin 不热更插件代码，最容易误判）
  */
-export const BRIDGE_BUILD = '2026-11-13T15:40Z-drop-selfupdate'
+export const BRIDGE_BUILD = '2026-11-13T18:40Z-npm-dual'
 
 /**
  * node-karin 各版本的导出集合不一致（1.18 就没有 cache），
@@ -842,7 +842,7 @@ const searchCommands = async (input = {}) => {
 /** 连通性自检：只证明 token 与路由都对，不触碰插件、不产生副作用 */
 const ping = () => ({
   pong: true,
-  version: '0.0.1',
+  version: '0.0.2-beta.1',
   build: BRIDGE_BUILD,
   dir: pluginRoot(),
   time: new Date().toISOString(),

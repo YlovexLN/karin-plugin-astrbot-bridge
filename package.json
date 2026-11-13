@@ -1,6 +1,6 @@
 {
   "name": "karin-plugin-astrbot-bridge",
-  "version": "0.0.1",
+  "version": "0.0.2-beta.1",
   "description": "为外部 Agent（AstrBot 等）提供 HTTP 接口：查询已装插件、列出可用指令、并把指令注入 Karin 插件分发器执行",
   "type": "module",
   "main": "index.js",

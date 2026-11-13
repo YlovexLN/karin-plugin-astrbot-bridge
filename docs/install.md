@@ -10,7 +10,7 @@ zip 里带面板产物 `web-dist/`（构建产物），不带 `web/` 源码—�
 ```bash
 npm install              # 只为了构建面板，第一次才需要（约 11 个前端依赖）
 npm run build:web        # web/ → web-dist/，产物约 1 MB
-npm run pack             # 产出 dist/karin-plugin-astrbot-bridge-v0.0.1.zip
+npm run pack             # 产出 dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip
 ```
 
 > `web-dist/` 与 `dist/` 都在 `.gitignore` 里，**克隆下来没有**，所以这一步不能省。
@@ -18,7 +18,7 @@ npm run pack             # 产出 dist/karin-plugin-astrbot-bridge-v0.0.1.zip
 
 ### 2. 在 Karin WebUI 里上传
 
-插件管理 → 安装插件 → 选 `dist/karin-plugin-astrbot-bridge-v0.0.1.zip` → 确认。
+插件管理 → 安装插件 → 选 `dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip` → 确认。
 
 安装成功后插件列表里会出现 **astrbot-bridge**，卡片上多了三个标签页：概览 / 插件 / 指令（就是 `web.config.js` 注册的那个 iframe 面板）。
 

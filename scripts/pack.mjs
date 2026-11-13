@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const ARCROOT = "karin-plugin-astrbot-bridge"
-const ZIP_NAME = "karin-plugin-astrbot-bridge-v0.0.1.zip"
+const ZIP_NAME = "karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip"
 /** 解压副本目录名（与 zip 同名，去掉 .zip），没有解压副本时为 null */
 const UNPACKED = "karin-plugin-astrbot-bridge"
 /**
@@ -25,7 +25,7 @@ const UNPACKED = "karin-plugin-astrbot-bridge"
  */
 const SKIP_DIRS = new Set(['.git', '.github', '.agents', 'node_modules', '__pycache__', '@karinjs', 'dist', 'docs', 'scripts', 'web'])
 /** 维护者文件不进包；_install_record.json 是运行时写的安装记录 */
-const SKIP_FILES = new Set(['.gitignore', '.gitattributes', '.npmrc', 'AGENTS.md', '_install_record.json'])
+const SKIP_FILES = new Set(['.gitignore', '.gitattributes', '.npmrc', 'AGENTS.md', '_install_record.json', 'package-lock.json'])
 const SKIP_EXT = new Set(['.pyc', '.pyo', '.log'])
 
 /** CRC32（zip 头需要它，node 标准库没有现成的） */

@@ -73,7 +73,7 @@ Karin 的指令对象是插件加载时 `karin.command(正则, 处理函数, { n
 更新就一条路：重装插件包 + 重启 Karin。
 
 ```bash
-npm run pack     # 产出 dist/karin-plugin-astrbot-bridge-v0.0.1.zip 与解压副本
+npm run pack     # 产出 dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip 与解压副本
 ```
 
 然后把 zip 上传到 Karin（WebUI → 插件管理 → 上传/安装），再重启 Karin——
@@ -102,5 +102,5 @@ kkk 在 `bilibili.videoQuality > 64` 且有登录态时走 `dash` 分支（`main
 
 ## 打包
 
-`npm run pack` 产出 `dist/karin-plugin-astrbot-bridge-v0.0.1.zip` 与同内容解压副本 `dist/karin-plugin-astrbot-bridge/`。
+`npm run pack` 产出 `dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip` 与同内容解压副本 `dist/karin-plugin-astrbot-bridge/`。
 只用 Node 标准库：不装依赖、不需要 Python。
