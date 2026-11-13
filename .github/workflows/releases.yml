@@ -103,6 +103,14 @@ jobs:
           echo "value=$DIST_TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VER dist-tag=$DIST_TAG"
 
+      # publishConfig.registry 会被当作 project config，优先级高于命令行 --registry：
+      # 仓库里一旦写死 GitHub Packages 的源，npm publish --registry=npmjs 也会被劫持过去。
+      # 这里再保险一次，确保发布的源就是 npmjs。
+      - name: 确认发布源
+        run: |
+          npm pkg delete publishConfig
+          node -e "const r=require('./package.json').publishConfig; if(r) { console.error('::error::publishConfig 没被清掉'); process.exit(1) }"
+
       # OIDC：不带 NODE_AUTH_TOKEN，provenance 由 npm 自动生成
       - name: 发布
         if: steps.state.outputs.needed == 'true'
