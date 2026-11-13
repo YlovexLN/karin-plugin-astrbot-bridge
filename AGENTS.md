@@ -27,7 +27,7 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 6. **指令表带 15 s TTL 且要能自愈**；不要自己 import `node_modules/node-karin/dist/*.mjs` 造缓存（会拿到另一份空模块实例）。
 7. **降级吞异常**：日志、`web.config`、README 扫描一律 try/catch，拿不到就少字段——一次 500 会让 AstrBot 整条链路报错。
 8. **只写自己的目录**（`__ASTRBOT_BRIDGE_DIR || pluginRoot()`），一次性产物用完即删。
-9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前为 **0.0.2-beta.1**。
+9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前为 **0.0.2**。
 10. **打包只用 `npm run pack`**（Node 标准库，不依赖 Python）；`dist/` 必须同时有 zip 与同名解压副本。
     **npm 双源发布**（`v*` tag 触发 `releases.yml`）：npmjs 用无 scope 名 `karin-plugin-astrbot-bridge` +
     Trusted Publishing（要 `id-token: write`）；GitHub Packages 用 `@ylovexln/` 前缀 + `GITHUB_TOKEN`

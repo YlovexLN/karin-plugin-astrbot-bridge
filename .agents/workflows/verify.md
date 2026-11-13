@@ -11,7 +11,7 @@ node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'));console.l
 ```bash
 node scripts/test.mjs                    # 27 项断言，桩件自动写 node_modules/node-karin
 node scripts/pack.mjs                    # 看字节数与文件数
-unzip -l dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip   # 应有 12 项，含 LICENSE 与 web-dist/，不含 web/ 与 docs/
+unzip -l dist/karin-plugin-astrbot-bridge-v0.0.2.zip   # 应有 12 项，含 LICENSE 与 web-dist/，不含 web/ 与 docs/
 ```
 `dist/` 要同时出现 zip 与同名解压副本。
 

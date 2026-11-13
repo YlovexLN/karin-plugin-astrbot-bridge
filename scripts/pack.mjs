@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const ARCROOT = "karin-plugin-astrbot-bridge"
-const ZIP_NAME = "karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip"
+const ZIP_NAME = "karin-plugin-astrbot-bridge-v0.0.2.zip"
 /** 解压副本目录名（与 zip 同名，去掉 .zip），没有解压副本时为 null */
 const UNPACKED = "karin-plugin-astrbot-bridge"
 /**

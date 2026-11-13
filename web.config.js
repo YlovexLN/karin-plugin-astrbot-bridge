@@ -27,7 +27,7 @@ export default {
   info: {
     id: 'karin-plugin-astrbot-bridge',
     name: 'AstrBot 桥',
-    version: '0.0.2-beta.1',
+    version: '0.0.2',
     description: '给 AstrBot / 其它 Agent 用的 HTTP 接口：查插件、查指令与触发规则、直接执行指令',
     icon: { name: 'hub', color: '#2563eb' },
     author: [{ name: 'astrbot' }],

@@ -39,7 +39,7 @@ find . -maxdepth 2 \( -name '_*' -o -name '*.tmp' -o -name '*.bak' -o -name '*.o
 ## 打包与发布
 ```bash
 npm run pack       # = node scripts/pack.mjs
-# 产物：dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip + dist/karin-plugin-astrbot-bridge/（解压副本）
+# 产物：dist/karin-plugin-astrbot-bridge-v0.0.2.zip + dist/karin-plugin-astrbot-bridge/（解压副本）
 ```
 版本号改了三处一起改：`package.json` 的 `version`、`scripts/pack.mjs` 的 `ZIP_NAME`、这里与 README/INSTALL 里的包名。
 

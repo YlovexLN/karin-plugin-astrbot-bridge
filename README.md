@@ -38,7 +38,7 @@ pnpm add karin-plugin-astrbot-bridge
 
 ```bash
 curl -s 'http://<Karin 主机>:7777/api/v1/astrbot/ping?token=<HTTP_AUTH_KEY>'
-# {"success":true,"pong":true,"version":"0.0.2-beta.1","build":"...","dir":"/app/plugins/..."}
+# {"success":true,"pong":true,"version":"0.0.2","build":"...","dir":"/app/plugins/..."}
 ```
 
 `401` 是令牌没对上；`404` 是路由没挂上（没装成或没重启）。令牌还没配时 `ping` 不用带 token，回 `tokenConfigured:false`。
@@ -121,7 +121,7 @@ Karin 的指令对象是插件加载时 `karin.command(正则, 处理函数, { n
 **没有自更新功能**（不提供 `update` / `unpack`），也不用起任何额外端口。
 
 ```bash
-npm run pack     # 产出 dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip 与解压副本
+npm run pack     # 产出 dist/karin-plugin-astrbot-bridge-v0.0.2.zip 与解压副本
 ```
 
 然后 WebUI → 插件管理 → 上传/安装，再重启 Karin —— 插件代码不热更，HMR 只盯 `karin-plugin-example`。

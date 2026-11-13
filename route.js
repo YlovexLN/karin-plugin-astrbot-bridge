@@ -842,7 +842,7 @@ const searchCommands = async (input = {}) => {
 /** 连通性自检：只证明 token 与路由都对，不触碰插件、不产生副作用 */
 const ping = () => ({
   pong: true,
-  version: '0.0.2-beta.1',
+  version: '0.0.2',
   build: BRIDGE_BUILD,
   dir: pluginRoot(),
   time: new Date().toISOString(),
