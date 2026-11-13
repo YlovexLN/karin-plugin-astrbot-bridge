@@ -6,6 +6,7 @@
 [![license](https://img.shields.io/badge/license-AGPL--3.0-blue.svg?style=flat-square)](./LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg?style=flat-square)](https://nodejs.org)
 [![Karin](https://img.shields.io/badge/karin-%3E%3D1.8.0-4F8EF7.svg?style=flat-square)](https://github.com/KarinJS/Karin)
+[![check](https://img.shields.io/github/actions/workflow/status/YlovexLN/karin-plugin-astrbot-bridge/check.yml?branch=main&style=flat-square&label=check)](https://github.com/YlovexLN/karin-plugin-astrbot-bridge/actions/workflows/check.yml)
 
 [GitHub](https://github.com/YlovexLN/karin-plugin-astrbot-bridge) · [问题反馈](https://github.com/YlovexLN/karin-plugin-astrbot-bridge/issues) · npm `karin-plugin-astrbot-bridge` · AGPL-3.0
 
@@ -15,7 +16,7 @@ Karin 的插件、指令、执行结果都在进程内存里，外部程序只�
 本插件在 Karin 的 HTTP 服务上挂一个前缀 `/api/v1/astrbot/`，用 Karin 自己的 `HTTP_AUTH_KEY` 鉴权，
 把「看」和「做」都摊成接口 —— 外部 Agent 因此能自己发现有哪些能力，再决定调用哪一个。
 
-- 十九个 action：业务接口一律 `POST /api/v1/astrbot/<action>` + `Authorization: Bearer <HTTP_AUTH_KEY>`
+- 十七个 action：业务接口一律 `POST /api/v1/astrbot/<action>` + `Authorization: Bearer <HTTP_AUTH_KEY>`
   （body 里写 `{"action":"..."}` 也行，URL 段优先）；只有 `page` / `assets` 是 `GET` + `?token=` —— iframe 发不出请求头
 - 端口跟 Karin 的 HTTP 口（默认 7777），**不额外开端口**
 - 令牌**不用单独配置**，直接认 Karin `.env` 里的 `HTTP_AUTH_KEY`（= WebUI 登录令牌）
@@ -32,6 +33,16 @@ pnpm add karin-plugin-astrbot-bridge
 
 > 必须装在 **Karin 安装根**（有 `package.json`、`node_modules`、`plugins/` 的那层）。
 > 包内已带面板产物 `web-dist/`，**装插件的人不需要 npm 构建**。
+
+装完自检（`<HTTP_AUTH_KEY>` 就是 Karin `.env` 里那个）：
+
+```bash
+curl -s 'http://<Karin 主机>:7777/api/v1/astrbot/ping?token=<HTTP_AUTH_KEY>'
+# {"success":true,"pong":true,"version":"0.0.2-beta.1","build":"...","dir":"/app/plugins/..."}
+```
+
+`401` 是令牌没对上；`404` 是路由没挂上（没装成或没重启）。令牌还没配时 `ping` 不用带 token，回 `tokenConfigured:false`。
+
 ## 接口
 
 | action | 作用 | 主要参数 |
@@ -40,11 +51,11 @@ pnpm add karin-plugin-astrbot-bridge
 | `page` | 返回面板 HTML（插件配置页 iframe 加载它） | — |
 | `assets` | 分发面板静态资源（`web-dist/` 下的 js/css） | 路径即文件名 |
 | `plugins` | 已装插件：名称/类型/目录/版本/是否启用/指令数 | `force` |
-| `commands` | 指令索引（转写 Karin 的 `/api/v1/plugin/loaded/command`）；`detail` 补触发正则与权限 | `plugin` `keyword` `offset` `limit` `detail` `force` |
+| `commands` | 指令索引（转写 Karin 的 `/api/v1/plugin/loaded/command`）；`detail` 补触发正则与权限（要 import 插件模块，慢，只给面板用） | `plugin` `keyword` `offset` `limit` `detail` `includeTrigger` `force` |
 | `search` | 按关键词找指令 | `keyword` `limit` |
 | `status` | 运行时概览：Bot、指令数、任务数 | — |
 | `call` | 执行任意一条已加载指令 | `plugin` `method` `text` `scene` `target` `deliver` |
-| `share` | 把链接交给解析类插件（B站/抖音 → kkk）并直发卡片 | `url` `useCase` `scene` `target` |
+| `share` | 把链接交给解析类插件（B站/抖音 → kkk）并直发卡片 | `text`（链接；`url` 同义） `useCase` `scene` `target` |
 | `send` | 以 Bot 身份发一段文本进会话，让插件自己解析出卡片 | `text` `scene` `target` |
 | `logs` | 读 Karin 报错 | `lines` `since` `onlyError` |
 | `probe` | 运行时体检：构建标记、缓存、node-karin 导出 | — |
@@ -55,6 +66,17 @@ pnpm add karin-plugin-astrbot-bridge
 | `amagitest` | 用 kkk 自带 amagi 客户端取一次视频流，看有没有 `dash` | `avid` `cid` `cookie` `ua` |
 
 `scene` / `target` 缺省时按**消息所在的会话**投递（群聊发群、私聊发私聊），不是发给提问的人。
+
+`readfile` / `writefile` / `fetchtext` / `amagitest` 是**排障口子**：查第三方插件报错、确认容器里网路通不通。
+自己调没问题，但别把这几个接到 LLM 的工具列表里 —— 写文件、任意发 HTTP 这类能力不该由模型自由支配。
+
+## 返回约定
+
+- 成功：`{"success":true,"took":<毫秒>,...}`，后面的字段由 action 决定
+- 失败：`{"success":false,"message":"..."}`，配合 HTTP 状态（`401` 令牌不对、`500` 内部错误或令牌没配上）
+- **业务失败不算请求失败**：`share` 找不到解析器、kkk 跑崩，都是 `success:true` + `ok:false` + `error`/`attempts`，HTTP 仍是 200
+- 指令表有 15 秒缓存，`force:true` 跳过它（`plugins`/`commands` 支持）
+
 ## WebUI
 
 插件卡片上的配置页是同源 iframe（`GET /api/v1/astrbot/page`），一个 React 单页应用。
@@ -66,6 +88,7 @@ pnpm add karin-plugin-astrbot-bridge
 - 路由走 hash（`#/plugins`）：`/api/v1/astrbot/assets/*` 已被静态资源占着，history 路由会打架。
 - 令牌：iframe 发不出 `Authorization` 头，所以 `web.config.js` 在服务端把令牌拼进 `page.url` 的 `?token=`，
   页面从 `location.search` 取回存 localStorage；页面自己发的请求一律 **POST + Bearer 头**。
+  直接用浏览器打开 `/api/v1/astrbot/page` 时页面会先要一个令牌，贴一次就存进 localStorage（键名 `astrbot-bridge-token`，想换就删这条再刷新）。
 - 「指令」页带 `detail: true`：Karin 的指令表路由不给正则，要按 method 把模块 import 回来读命令对象的
   `reg` / `permission`（ESM 缓存命中后 26 条 30~40 ms），页面据此标出「内容触发 / 命令」两档。
 - 「试跑」默认只把插件回复收进 `reply`，勾「真的发出去」才投到 QQ。
@@ -84,6 +107,7 @@ npm run build:web    # 产出 web-dist/
 Karin 的指令对象是插件加载时 `karin.command(正则, 处理函数, { name })` 创建的。
 `call` 按「插件目录 + 文件」把**同一个模块** import 回来，取 `method` 对应的**具名导出**（就是那个命令对象），
 再用最小事件对象调它 —— 插件看到的是自己熟悉的 `e.msg` / `e.reply`，不会收到伪造的 OneBot 事件。
+
 ## 文件类 action 的边界
 
 `readfile` / `writefile` 只认这几个根：插件目录、`/app/plugins`、`/app/node_modules`、`/app/config`、
@@ -113,6 +137,7 @@ kkk 在 `bilibili.videoQuality > 64` 且有登录态时走 `dash` 分支，而 B
 `share` 原先「业务函数失败 → 退回引用解析指令」，等于把同一条链接再喂一遍，而 kkk 出错时会自己
 `e.reply` 一张「歇菜」错误卡到会话里 —— 用户莫名收到红图就是这么来的。现在只有「业务函数压根找不到」才走兜底，
 **找到了但跑崩直接 `ok:false`、不发任何卡片**。返回里 `attempts` 的 `phase`（`resolve` / `run`）可区分两者。
+
 ## 开发
 
 ```bash

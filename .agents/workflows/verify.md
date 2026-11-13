@@ -9,11 +9,12 @@ node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'));console.l
 
 ## 2. 本地（不连 Karin）
 ```bash
-node scripts/test.mjs                    # 24 项断言，桩件自动写 node_modules/node-karin
+node scripts/test.mjs                    # 27 项断言，桩件自动写 node_modules/node-karin
 node scripts/pack.mjs                    # 看字节数与文件数
-unzip -l dist/karin-plugin-astrbot-bridge-v0.0.1.zip   # 应有 11 项，含 LICENSE，不含 web/ 与 docs/
+unzip -l dist/karin-plugin-astrbot-bridge-v0.0.2-beta.1.zip   # 应有 12 项，含 LICENSE 与 web-dist/，不含 web/ 与 docs/
 ```
 `dist/` 要同时出现 zip 与同名解压副本。
+
 ## 3. 部署后
 ```bash
 T=<HTTP_AUTH_KEY>
@@ -26,4 +27,4 @@ curl -s -X POST http://<Karin 主机>:7777/api/v1/astrbot/commands -H "Authoriza
 
 ## 4. 端到端（AstrBot 侧）
 在 AstrBot 里点一次 `karin_plugins`，或直接问「karin 装了哪些插件」。
-失败时先看 Karin 日志（`GET /api/v1/log?name=YYYY-MM-DD`）里有没有 `[astrbot-bridge]` 行。
+失败时先看 Karin 日志里有没有 `[astrbot-bridge]` 行（该前缀出现在每条 `action=… build=…` 的调试行上）。

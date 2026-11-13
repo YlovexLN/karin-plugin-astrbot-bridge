@@ -8,7 +8,7 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 | `index.js` | 插件入口，在 `KARIN_PLUGIN_INIT` 里 `router.use('/astrbot', handler)`（`mounted` 标记保证幂等） |
 | `apps.js` | 只做 `export { KARIN_PLUGIN_INIT } from './index.js'`——npm 类型插件必须靠 `karin.apps` 才会被加载 |
 | `dir.js` | 路径常量：`PluginDir` / `PluginName` / `WebDistDir` |
-| `route.js` | 各 action 的实现，单文件无内部依赖（`page`/`assets` 在 handler 里先处理，共十七个） |
+| `route.js` | 各 action 的实现，单文件无内部依赖。handler 先处理 `page`/`assets` 两个 GET，其余 15 个 `case` 走 `dispatch`，合计十七个 |
 | `web.config.js` | 插件卡片：`info` / `page`（指向 `/api/v1/astrbot/page` 的 iframe）/ `components` / `save()` |
 | `web/` → `web-dist/` | React 面板源码与构建产物（`web-dist/` 要进插件目录） |
 | `scripts/pack.mjs` | 打 zip + 解压副本到 `dist/` |
@@ -35,8 +35,9 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
     `files` 白名单必须含 `web-dist`，否则装上去面板是空壳；`karin.apps` 必须声明，否则 npm 装不上。
 11. **面板不引运行时依赖**：`web-dist/` 是纯静态产物，装插件的人不需要 npm。
 12. **路径前缀三处必须一致**：`web/vite.config.mjs` 的 `base`、`sendAsset` 截 `/assets/` 之后的部分、`web.config.js` 的 `page.url`。
+13. **`page` 不许硬编码令牌进文件**：它读 `web-dist/index.html`，在响应时把令牌拼进 `?token=` 给前端；读不到 `web-dist/` 就回一页提示（不抛 500）。
 
-细节：1–7 见 [`.agents/rules/invariants.md`](./.agents/rules/invariants.md)，8–12 见 [`.agents/rules/workspace.md`](./.agents/rules/workspace.md)。
+细节：1–7 见 [`.agents/rules/invariants.md`](./.agents/rules/invariants.md)，8–13 见 [`.agents/rules/workspace.md`](./.agents/rules/workspace.md)。
 
 ## 影响面
 
@@ -81,3 +82,4 @@ curl -X POST http://<Karin 主机>:7777/api/v1/restart -H 'Authorization: Bearer
 - **`config.port` 是函数**（`() => Number(process.env.HTTP_PORT) || 7777`），直接拼进 URL 会 `Failed to parse URL`。
 - **插件 router 带 baseUrl**，`req.params.action` 是空的，靠 `actionFromUrl(req)` 兜底。
 - **面板样式静默失效**：HeroUI 只写 CSS 变量不注册 Tailwind token，新颜色工具类先在构建产物里确认类名存在。
+- **`web-dist/` 缺失不是错误**：`page` 回提示页、冒烟测试自动 SKIP 页面断言——本地删了构建产物不会让测试变红。
