@@ -1,0 +1,53 @@
+{
+  "name": "karin-plugin-astrbot-bridge",
+  "version": "0.0.1",
+  "description": "为外部 Agent（AstrBot 等）提供 HTTP 接口：查询已装插件、列出可用指令、并把指令注入 Karin 插件分发器执行",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "karin": ">=1.8.0"
+  },
+  "karin": {
+    "web": "./web.config.js"
+  },
+  "files": [
+    "index.js",
+    "dir.js",
+    "route.js",
+    "web.config.js",
+    "web-dist",
+    "LICENSE",
+    "README.md",
+    "INSTALL.md"
+  ],
+  "keywords": [
+    "karin",
+    "karin-plugin",
+    "astrbot",
+    "bridge",
+    "agent"
+  ],
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "build": "node scripts/pack.mjs",
+    "pack": "node scripts/pack.mjs",
+    "test": "node scripts/test.mjs",
+    "build:web": "vite build --config web/vite.config.mjs",
+    "dev:web": "vite --config web/vite.config.mjs",
+    "typecheck:web": "tsc -p web/tsconfig.json"
+  },
+  "devDependencies": {
+    "@heroui/react": "3.2.6",
+    "@heroui/styles": "3.2.6",
+    "@tailwindcss/vite": "4.3.3",
+    "@vitejs/plugin-react": "6.1.2",
+    "lucide-react": "^1.59.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router-dom": "7.18.4",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.4"
+  }
+}

@@ -1,0 +1,38 @@
+name: check
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 语法检查
+        run: |
+          set -e
+          for f in index.js dir.js route.js web.config.js scripts/*.mjs; do
+            echo "check $f"
+            node --check "$f"
+          done
+
+      - name: 冒烟测试
+        run: node scripts/test.mjs
+
+      - name: 校验 package.json
+        run: |
+          node -e "
+            const fs = require('node:fs')
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+            if (!pkg.karin) throw new Error('package.json 缺少 karin 字段')
+            if (!pkg.main) throw new Error('package.json 缺少 main 字段')
+            if (pkg.license !== 'AGPL-3.0-only') throw new Error('license 必须是 AGPL-3.0-only')
+            console.log('package.json OK:', pkg.name, pkg.version)
+          "

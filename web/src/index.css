@@ -1,0 +1,110 @@
+@import 'tailwindcss';
+@import '@heroui/styles';
+
+/*
+ * 把 HeroUI 的主题变量映射成 Tailwind 的颜色工具类。
+ * HeroUI 3 只往 :root 写了 --accent / --surface / --border 这类变量，
+ * 没有注册成 Tailwind 的 color token，所以 `bg-primary` `text-default-400`
+ * 这类类名在构建产物里根本不存在（表现为样式静默失效，选中态没有底色）。
+ * 这里统一补一层映射：颜色一律取 HeroUI 变量，深浅色由 .dark 自动切换，
+ * 组件里只写工具类，不写死色值。
+ */
+@theme {
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-foreground);
+  --color-primary-soft: var(--accent-soft);
+
+  --color-surface: var(--surface);
+  --color-content1: var(--surface);
+  --color-muted: var(--muted);
+  --color-content2: var(--default-soft);
+
+  --color-default-100: color-mix(in oklab, var(--border) 55%, transparent);
+  --color-default-200: var(--border);
+  --color-default-300: color-mix(in oklab, var(--foreground) 22%, transparent);
+  --color-default-400: color-mix(in oklab, var(--foreground) 40%, transparent);
+  --color-default-500: color-mix(in oklab, var(--foreground) 55%, transparent);
+  --color-default-600: color-mix(in oklab, var(--foreground) 70%, transparent);
+  --color-default-700: color-mix(in oklab, var(--foreground) 85%, transparent);
+
+  --color-warning: var(--warning);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'HarmonyOS Sans SC', 'Noto Sans SC', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* 细滚动条，和 Karin 主 Web 保持一致 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--foreground) 18%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 18%, transparent);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 玻璃质感面板 */
+.glass-panel {
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* 配置页入场动画由 GSAP 接管，这里只处理首次挂载前的隐藏 */
+[data-config-section] {
+  will-change: transform, opacity;
+}
+
+/* 标签输入 */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+
+.tag-chip button {
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
+  transition: color 0.15s ease;
+}
+
+.tag-chip button:hover {
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
