@@ -62,7 +62,7 @@ index.js  apps.js  dir.js  route.js  web.config.js  web-dist/  LICENSE  README.m
 
 1. 校验 tag 与 `package.json` 的 version 一致
 2. `npm ci` + `npm run build:web`（面板产物）
-3. `node scripts/test.mjs`（仅 npmjs job；25 项冒烟）
+3. `node scripts/test.mjs`（仅 npmjs job；27 项冒烟）
 4. 查该版本是否已存在于目标源 → 已存在就跳过（**重跑同一 tag 不会红**）
    - npmjs：`GET https://registry.npmjs.org/karin-plugin-astrbot-bridge/<版本>`，404 = 未发布
    - GitHub Packages：对不存在的包返回 **401**（不是 404），同样按未发布处理
@@ -71,13 +71,20 @@ index.js  apps.js  dir.js  route.js  web.config.js  web-dist/  LICENSE  README.m
 
 ## dist-tag
 
-| 版本 | dist-tag |
-| --- | --- |
-| `0.0.2` | `latest` |
-| `0.0.2-beta.1` | `beta` |
-| `0.0.2-rc.1` | `rc` |
+**latest 永远指向最后发布的那个版本，beta 也算。**
 
-规则：取预发布标识的第一段。预发布**必须**显式给 `--tag`，否则 npm 直接拒绝。
+| 版本 | 主 tag | 额外别名 |
+| --- | --- | --- |
+| `0.0.2` | `latest` | — |
+| `0.0.2-beta.1` | `latest` | `beta` |
+| `0.0.2-rc.1` | `latest` | `next` |
+
+规则：`npm publish --tag latest` 之后，若版本带预发布后缀，再
+`npm dist-tag add <包>@<版本> beta|next` 补一个通道别名。
+
+这是本项目的取舍——包只给自己用，所以不区分「装稳定的还是装最新的」，
+`npm i karin-plugin-astrbot-bridge` 拿到的就是最后发出来的东西。
+预发布版本**必须**显式给 `--tag`，否则 npm 直接拒绝。
 
 ## 首次发布（各做一次）
 

@@ -56,6 +56,9 @@ npm i karin-plugin-astrbot-bridge
 
 然后重启 Karin。包内已带 `web-dist/`，不用构建、不用 npm run anything。
 
+> 现在 npm 上最新的是 beta（`0.0.2-beta.1`），`latest` 也指向它。想固定在某个版本就写全：
+> `npm i karin-plugin-astrbot-bridge@0.0.2-beta.1`。
+
 > **必须装在 Karin 安装根**，不能装进 `plugins/`：npm 类型插件的目录是
 > `path.join(process.cwd(), 'node_modules', <包名>)`，Karin 只扫根目录 `package.json` 的
 > `dependencies`/`devDependencies` 里列出的包。
