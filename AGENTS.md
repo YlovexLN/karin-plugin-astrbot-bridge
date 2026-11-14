@@ -46,6 +46,8 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 - 没有新增 `dependencies`，没有硬编码令牌，没有残留 `_*` / `*.tmp` / `*.bak`
 
 ## 别踩的坑
+
+- **业务函数跑崩就不再退回指令兜底**：`share` 只有「压根找不到指令」（`attempts` 的 `phase: 'resolve'`）才继续往下喂 `prefix` 指令；找到了但业务函数抛错（`phase: 'run'`，`route.js:1399`）直接 `ok:false` + 原始 stack、一张卡都不发（`route.js:1412-1423`）。退回去等于把同一条链接再喂一遍，kkk 出错时会自己 `e.reply` 一张「歇菜」错误卡。别把这段改回「失败就兜底」。
 - **GET 只认 `?token=`**：`dispatch(action, req.body || {})` 不看 query，`?limit=` / `?detail=` 全被忽略，要 POST JSON。
 - **Karin 1.18 没有 HTTP 写插件的通道**：`/api/v1/plugin/install` 只吃 JSON，multipart 一律 500，`/plugin/upload` 系全 404。更新只能 WebUI 上传 zip 或手动覆盖目录，改完重启。
 - **两套令牌**：Karin 自己的 `/api/v1/*` 用 accessToken（`POST /api/v1/login {authorization: sha256(HTTP_AUTH_KEY)}` 换），本插件路由用 `Bearer <HTTP_AUTH_KEY>`。
@@ -53,3 +55,4 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 - **插件 router 带 baseUrl**，`req.params.action` 是空的，靠 `actionFromUrl(req)` 兜底。
 - **面板样式静默失效**：HeroUI 只写 CSS 变量不注册 Tailwind token，先用 `@theme` 映射，并在构建产物里确认类名存在。
 - **`web-dist/` 缺失不是错误**：`page` 回提示页、冒烟测试自动 SKIP 页面断言。
+- **kkk 的 B站视频解析有已知崩溃**（`videoQuality > 64` + 有登录态时读 `dash.video`，B站只回 `durl`）：只要走视频解析就会出现，与调用方无关；按 ADR-10 如实回 `ok:false`，不改用户配置。细节见 [`.agents/skills/troubleshooting.md`](./.agents/skills/troubleshooting.md)。

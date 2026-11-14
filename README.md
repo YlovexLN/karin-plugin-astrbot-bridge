@@ -82,12 +82,6 @@ Karin 的指令对象是插件加载时 `karin.command(正则, 处理函数, { n
 
 卸载：`pnpm remove karin-plugin-astrbot-bridge`（GitHub Packages 装的是 `@ylovexln/karin-plugin-astrbot-bridge`；目录安装则删 `plugins/karin-plugin-astrbot-bridge`），然后重启。本插件不写数据库、不改框架源码，删完即还原。
 
-## 已知坑
-
-**kkk 解析 B站 报 `Cannot read properties of undefined (reading 'video')`**：kkk 在 `bilibili.videoQuality > 64` 且有登录态时走 `dash` 分支，而 B站 playurl 对部分账号/网络只回 `durl` 形状，那行没有可选链。这是 kkk 的 bug，bridge **不替用户改配置、不写 `node_modules`**，只如实回 `ok:false` + 原始 stack。
-
-**业务函数报错不再退回指令兜底**：`share` 原先「业务函数失败 → 退回引用解析指令」，等于把同一条链接再喂一遍，而 kkk 出错时会自己 `e.reply` 一张「歇菜」错误卡。现在只有「压根找不到」才走兜底，**找到了但跑崩直接 `ok:false`、不发任何卡片**（`attempts` 的 `phase` 区分两者）。
-
 ## 开发
 
 ```bash
@@ -97,9 +91,7 @@ npm run pack            # 打包，只用 Node 标准库：不装依赖、不需
 
 架构、约束、排障、决策见 [`AGENTS.md`](./AGENTS.md) 与 [`.agents/`](./.agents/)；双源发布（OIDC、dist-tag）见 [发布文档](./docs/publish.md)。
 
-## 作者与致谢
-
-YlovexLN · [GitHub](https://github.com/YlovexLN) · [ylovexln@foxmail.com](mailto:ylovexln@foxmail.com)。出问题请到 [Issues](https://github.com/YlovexLN/karin-plugin-astrbot-bridge/issues) 提，附上 Karin 版本、`/api/v1/astrbot/probe` 的返回与复现步骤。
+## 致谢
 
 - 代码与文档由 **DeepSeekRuntime** 配合 **DeepSeek-V4.1-Flash** 模型编写；需求、部署与实测由作者完成。
 - WebUI 的布局与交互参照 [karin-plugin-kkk](https://github.com/ikenxuan/karin-plugin-kkk) 的面板。

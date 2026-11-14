@@ -31,6 +31,8 @@ kkk 的 `handlePrefix` 第一步就 `e.msg = await Common.getReplyMessage(e)`，
 ## ADR-10 不替用户改第三方插件的配置
 用户 m05825：「不需要你解析视频啊 就按我kkk插件配置好的来」。排查 kkk 崩溃时把 `bilibili.videoQuality` 从 127 临时改 64 验证过（64 能过，80/127 崩在 `main.js:32731` 的 `playUrlData.data.data.dash.video`，B站 playurl 对这套账号只回 `durl`），但**结论不是去改它**：配置保持 127，不绕过、不写 `node_modules`。
 
+2026-11-14 用户 m09920 追问「是不是调用视频解析时才出现、是不是 AstrBot 没规定好」，确认：**只要走 kkk 的 B站视频解析就会触发，与调用方、指令无关**——bridge 只递一条链接，`videoQuality` 与登录态都在 kkk 自己手里；AstrBot 侧已改成只传链接不解析，也绕不开（出卡片本身就依赖 kkk 拉流渲染）。用户 m09932 定调：「不用在 README 里写明，但是要让 AI 能知道有这个问题」——所以这条从 README 已知坑移出，写进 `skills/troubleshooting.md` 与这里。2026-11-14 00:13 的日志另见 kkk `COOKIE_EXPIRED`（登录态会随 cookie 过期变化）。
+
 ## ADR-12 面板改成 React 应用（2026-11-10）
 用户 m06662「算了直接用这个skills」，手写单文件 `webui.html` 视觉过不去。做法：只搬前端（React 19 + HeroUI 3 + Tailwind 4 + Vite 8），**不搬 skill 的 Express 挂载**（它依赖 Karin 导出 `app`/`router`/`authMiddleware`，部分版本没有），静态资源改由 `assets` action 分发。否决：继续手改 HTML / 照搬 Express 挂载 / history 路由（与 `/assets/*` 冲突）。代价：多出 `web/` 与构建步骤。
 

@@ -18,10 +18,24 @@
 | `logs` 说「进程内没有捕获到未处理错误」 | 走了兜底层，看返回的 `mode` |
 | `share` 说「没找到解析插件的指令」 | `karin-plugin-kkk` 没装或没加载，用 `plugins` 确认 |
 | `share` 成功但会话里没卡片 | kkk 侧解析失败（风控、Cookie 过期），用 `logs` 看 `[ERROR]` 行 |
-| 会话里莫名收到「歇菜」错误卡 | `share` 退回了指令兜底——业务函数找到但报错时不该再喂一遍 |
+| `share` 回 `Cannot read properties of undefined (reading 'video')` | kkk 的 B站视频解析崩了，**不是 bridge 的问题**，见下「kkk 的已知 bug」 |
+| 会话里莫名收到「歇菜」错误卡 | `share` 退回了指令兜底——业务函数找到但报错时不该再喂一遍（现已在 `phase === 'run'` 时直接 `ok:false`，若再现说明这层分支被改动） |
 | 改了代码但行为没变 | 插件不热更：上传新 zip 或覆盖目录后重启；用 `ping` 的 `build` 字段确认跑的是哪份 |
 | 配置页 500 | Karin 1.18 的 `getWebConfig` 读 `info.version` 崩，`web.config.js` 必须带 `info.version` |
 | 面板样式没生效、控制台又不报错 | HeroUI 变量没在 `@theme` 里映射，类名在构建产物里不存在（ADR-13） |
+
+## kkk 的已知 bug：B站视频解析 `reading 'video'`
+
+**现象**：`share`（或 `call` 调 `bilibiliAPP` / `prefix`）返回 `ok:false`，错误里带 `Cannot read properties of undefined (reading 'video')`，会话里没有卡片；kkk 自己的日志里也可能先出现一张「歇菜」错误卡。
+
+**成因**：kkk 的 `lib/main.js` 在 `bilibili.videoQuality > 64` 且有登录态时走 `dash` 分支，直接读 `playUrlData.data.data.dash.video`，那一行没有可选链；而 B站 playurl 对部分账号只回 `durl` 形状，于是 `dash` 是 `undefined`。
+
+**只要走到 kkk 的 B站视频解析就会触发，与谁调用、调哪条指令无关**：bridge 交给 kkk 的只有一条链接，`videoQuality` 的取值和登录态都由 kkk 自己的配置与 cookie 决定。AstrBot 侧「不解析视频、只传链接」绕不开它——出卡片本身就依赖 kkk 把视频流拉下来渲染。
+
+**该怎么处理**：
+1. 如实把 `ok:false` 与原始 stack 回给调用方，**不改用户配置、不写 `node_modules`**（ADR-10）。
+2. 记录“最近一次 B站解析失败原因”，`status` / `probe` 里能看到；cookie 过期（kkk 日志 `COOKIE_EXPIRED`）时提示用户重新登录。
+3. 不自动降级去改 `videoQuality`：配置是用户的，改了会连带影响 kkk 的其它行为。真要绕开只能用户自己把 `videoQuality` 降到 64 以下，或给 kkk 提 issue。
 
 ## 三处细说
 
@@ -33,3 +47,5 @@
 
 ## 日志读不到
 `readLogs` 的 `mode` 说明走到第几层：`errorLogs` → `remote`（`/api/v1/log?name=YYYY-MM-DD`）→ `local`（`logs/logger.YYYY-MM-DD.log`）。
+
+2026-11-14 实测：`local` 兜底在容器里拿到的是**当天**的日志（`source: logs/file:2026-11-14`），传 `file` 指定日期不生效；`readfile` 读 `/app/logs/2026-11-12.log` 报「文件不存在」。也就是说**只能看到当天的**，跨天排查要在当天就把日志取出来。
