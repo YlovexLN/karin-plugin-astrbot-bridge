@@ -23,6 +23,9 @@
     "README.md",
     "INSTALL.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/YlovexLN/karin-plugin-astrbot-bridge.git"
