@@ -4,7 +4,7 @@
 
 ```bash
 # 1. 改 package.json 的 version 并提交；2. 打 tag
-git tag v0.0.2 && git push origin v0.0.2
+git tag v0.0.3 && git push origin v0.0.3
 ```
 
 | 源 | 包名 | 认证 |
@@ -38,7 +38,7 @@ git tag v0.0.2 && git push origin v0.0.2
 
 ## dist-tag
 
-**latest 永远指向最后发布的版本，beta 也算。** `0.0.2` → `latest`；`0.0.2-beta.1` → `latest` + `beta`；`0.0.2-rc.1` → `latest` + `next`。即 `npm publish --tag latest` 后，若版本带预发布后缀再 `npm dist-tag add <包>@<版本> beta|next`。这是刻意取舍——包只给自己用，`npm i` 拿到的就是最后发出来的东西；预发布版本**必须**显式给 `--tag`，否则 npm 拒绝。
+**latest 永远指向最后发布的版本，beta 也算。** `0.0.3` → `latest`；`0.0.3-beta.1` → `latest` + `beta`；`0.0.3-rc.1` → `latest` + `next`。即 `npm publish --tag latest` 后，若版本带预发布后缀再 `npm dist-tag add <包>@<版本> beta|next`。这是刻意取舍——包只给自己用，`npm i` 拿到的就是最后发出来的东西；预发布版本**必须**显式给 `--tag`，否则 npm 拒绝。
 
 ## 首次发布（各做一次）
 

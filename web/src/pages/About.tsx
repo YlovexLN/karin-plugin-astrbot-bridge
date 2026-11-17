@@ -8,7 +8,7 @@ import { PageHead } from '../components/ui'
 const features = [
   { icon: Zap, title: '给 Agent 用的接口', description: '查插件、查指令、直接执行指令、读日志，全部走一个前缀。' },
   { icon: ShieldCheck, title: '令牌复用', description: '不单独存密钥，直接用 Karin 的 HTTP_AUTH_KEY。' },
-  { icon: Sparkles, title: '面板外壳', description: '照 kkk 面板抄：顶部一排药丸标签，没有侧边栏。' }
+  { icon: Sparkles, title: 'WebUI 界面', description: '参考 KKK 项目的独立面板：顶部一排药丸标签，没有侧边栏。' }
 ]
 
 const links = [

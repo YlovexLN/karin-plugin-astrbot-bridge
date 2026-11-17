@@ -23,7 +23,7 @@ Karin 插件，给外部 Agent（AstrBot 等）提供 HTTP 桥：`POST /api/v1/a
 6. **指令表带 15 s TTL 且要能自愈**：不要自己 import `node_modules/node-karin/dist/*.mjs` 造缓存（会拿到另一份空模块实例）。
 7. **降级吞异常**：日志、`web.config`、README 扫描一律 try/catch，拿不到就少字段——一次 500 会让 AstrBot 整条链路报错。
 8. **只写自己的目录**（`__ASTRBOT_BRIDGE_DIR || pluginRoot()`），一次性产物用完即删。
-9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前 **0.0.2**。
+9. **发布由用户决定**：不自行 `git init/commit/push`、不擅自部署；版本号改动要用户点头，当前 **0.0.3**。
 10. **打包只用 `npm run pack`**（Node 标准库）；`dist/` 必须同时有 zip 与同名解压副本。双源发布由 `v*` tag 触发 `releases.yml`：npmjs 用无 scope 名 + Trusted Publishing（要 `id-token: write`），GitHub Packages 用 `@ylovexln/` + `GITHUB_TOKEN`（**绝不能给 id-token**），两个 job 必须分开。`files` 白名单必须含 `web-dist`，`karin.apps` 必须声明。
 11. **面板不引运行时依赖**：`web-dist/` 是纯静态产物。
 12. **路径前缀三处一致**：`web/vite.config.mjs` 的 `base`、`sendAsset` 截 `/assets/` 之后的部分、`web.config.js` 的 `page.url`。

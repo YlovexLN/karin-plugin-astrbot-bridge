@@ -6,7 +6,7 @@
 只**读** Karin 插件目录与日志目录；只**写**自己的目录（`process.env.__ASTRBOT_BRIDGE_DIR || pluginRoot()`）；一次性产物用完即删。
 
 ## 9–10. 发布与打包
-不自行 `git init/commit/push`、不擅自部署。版本号改动要用户点头，当前 **0.0.2**。打包只用 `npm run pack`（Node 标准库），`dist/` 下必须同时有 zip 与同名解压副本。**没有自更新通道**（用户 m08365）：只能 WebUI 上传 zip 或覆盖目录后重启 Karin。
+不自行 `git init/commit/push`、不擅自部署。版本号改动要用户点头，当前 **0.0.3**。打包只用 `npm run pack`（Node 标准库），`dist/` 下必须同时有 zip 与同名解压副本。**没有自更新通道**（用户 m08365）：只能 WebUI 上传 zip 或覆盖目录后重启 Karin。
 
 npm 双源由 `v*` tag 触发 `releases.yml`，两个 job 必须分开：npmjs 用无 scope 名 + Trusted Publishing（要 `id-token: write`）；GitHub Packages 用 `@ylovexln/` 前缀 + `GITHUB_TOKEN`（**绝不能给 id-token**，npm 会走 OIDC 直接 ENEEDAUTH）。细节见 [`docs/publish.md`](../../docs/publish.md)。
 

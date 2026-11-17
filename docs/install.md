@@ -11,13 +11,13 @@ pnpm add karin-plugin-astrbot-bridge    # 或 npm i karin-plugin-astrbot-bridge
 
 > **必须装在 Karin 安装根**：npm 类插件的目录是 `path.join(process.cwd(), "node_modules", <包名>)`，Karin 只扫根 `package.json` 的 `dependencies` / `devDependencies`。本包声明了 `karin.apps`，所以会被当插件加载（少了这个字段只当普通依赖）。
 >
-> 现最新是 `0.0.2`，上面两条命令拿到的就是它；要固定写 `@0.0.2`。
+> 现最新是 `0.0.3`，上面两条命令拿到的就是它；要固定写 `@0.0.3`。
 
 ## 二、从 GitHub 仓库装
 
 ```bash
 cd <Karin 根目录>
-pnpm add github:YlovexLN/karin-plugin-astrbot-bridge    # 可加 #v0.0.2 锁版本
+pnpm add github:YlovexLN/karin-plugin-astrbot-bridge    # 可加 #v0.0.3 锁版本
 ```
 
 ⚠️ 拿到的是**源码**，`web-dist/` 在 `.gitignore` 里不在仓库中 —— 面板会显示「未构建」提示页。要面板就用方式一，或自己 `npm install && npm run build:web`（见方式四）。
@@ -42,7 +42,7 @@ pnpm add github:YlovexLN/karin-plugin-astrbot-bridge    # 可加 #v0.0.2 锁版�
 ```bash
 npm install              # 只为了构建面板，第一次才需要（约 11 个前端依赖）
 npm run build:web        # web/ → web-dist/，产物约 1 MB
-npm run pack             # 产出 dist/karin-plugin-astrbot-bridge-v0.0.2.zip
+npm run pack             # 产出 dist/karin-plugin-astrbot-bridge-v0.0.3.zip
 ```
 
 然后 Karin WebUI → 插件管理 → 安装插件 → 选这个 zip。`web-dist/` 与 `dist/` 都在 `.gitignore` 里，克隆下来没有，这一步不能省。

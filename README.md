@@ -24,7 +24,7 @@ pnpm add karin-plugin-astrbot-bridge    # 包内已带 web-dist，不需要自�
 
 ```bash
 curl -s "http://<Karin 主机>:7777/api/v1/astrbot/ping?token=<HTTP_AUTH_KEY>"
-# {"success":true,"pong":true,"version":"0.0.2","build":"...","dir":"/app/plugins/..."}
+# {"success":true,"pong":true,"version":"0.0.3","build":"...","dir":"/app/plugins/..."}
 ```
 
 `401` 是令牌没对上；`404` 是路由没挂上（没装成或没重启）。令牌还没配时 `ping` 不用带 token，回 `tokenConfigured:false`。
@@ -68,7 +68,7 @@ Karin 的指令对象是插件加载时 `karin.command(正则, 处理函数, { n
 
 ## WebUI
 
-插件配置页是同源 iframe（`GET /api/v1/astrbot/page`），React 单页应用：概览 / 插件 / 指令 / 试跑 / 关于，**没有日志页**（日志是给 Agent 排障用的）。布局参照 [karin-plugin-kkk](https://github.com/ikenxuan/karin-plugin-kkk) 的面板：无侧边栏，顶部一排药丸标签。
+插件配置页是同源 iframe（`GET /api/v1/astrbot/page`），React 单页应用：概览 / 插件 / 指令 / 试跑 / 关于，**没有日志页**（日志是给 Agent 排障用的）。WebUI 界面参考 [KKK 项目](https://github.com/ikenxuan/karin-plugin-kkk) 的面板：无侧边栏，顶部一排药丸标签。
 
 - 路由走 hash（`#/plugins`）：`/api/v1/astrbot/assets/*` 已被静态资源占着。
 - 令牌：iframe 带不了 `Authorization`，所以服务端把令牌拼进 `page.url` 的 `?token=`，页面存 localStorage（键 `astrbot-bridge-token`）；页面自己发的请求一律 POST + Bearer 头。浏览器直接打开 `page` 时会先要一次令牌。
@@ -78,7 +78,7 @@ Karin 的指令对象是插件加载时 `karin.command(正则, 处理函数, { n
 
 ## 更新与卸载
 
-**没有自更新功能**，也不起额外端口。改完代码：`npm run pack` → WebUI 插件管理上传 `dist/karin-plugin-astrbot-bridge-v0.0.2.zip` → 重启 Karin（HMR 只盯 `karin-plugin-example`）。装了 npm 包的话也可以 `pnpm add karin-plugin-astrbot-bridge@<新版本>` 后重启。
+**没有自更新功能**，也不起额外端口。改完代码：`npm run pack` → WebUI 插件管理上传 `dist/karin-plugin-astrbot-bridge-v0.0.3.zip` → 重启 Karin（HMR 只盯 `karin-plugin-example`）。装了 npm 包的话也可以 `pnpm add karin-plugin-astrbot-bridge@<新版本>` 后重启。
 
 卸载：`pnpm remove karin-plugin-astrbot-bridge`（GitHub Packages 装的是 `@ylovexln/karin-plugin-astrbot-bridge`；目录安装则删 `plugins/karin-plugin-astrbot-bridge`），然后重启。本插件不写数据库、不改框架源码，删完即还原。
 
@@ -94,7 +94,7 @@ npm run pack            # 打包，只用 Node 标准库：不装依赖、不需
 ## 致谢
 
 - 代码与文档由 **DeepSeekRuntime** 配合 **DeepSeek-V4.1-Flash** 模型编写；需求、部署与实测由作者完成。
-- WebUI 的布局与交互参照 [karin-plugin-kkk](https://github.com/ikenxuan/karin-plugin-kkk) 的面板。
+- WebUI 界面参考 [KKK 项目](https://github.com/ikenxuan/karin-plugin-kkk) 的面板。
 - 具体要暴露哪些能力（插件清单、指令、链接卡片、日志）来自 [AstrBot](https://github.com/AstrBotDevs/AstrBot) 侧的实际需求。
 
 ## License

@@ -12,6 +12,6 @@
 
 **临时文件**：`find . -maxdepth 2 \( -name '_*' -o -name '*.tmp' -o -name '*.bak' -o -name '*.orig' \) -print`
 
-**打包**：`npm run pack` → `dist/karin-plugin-astrbot-bridge-v0.0.2.zip` + 同名解压副本。版本号要三处一起改：`package.json` 的 `version`、`scripts/pack.mjs` 的 `ZIP_NAME`、README/INSTALL 里的包名。
+**打包**：`npm run pack` → `dist/karin-plugin-astrbot-bridge-v0.0.3.zip` + 同名解压副本。版本号要三处一起改：`package.json` 的 `version`、`scripts/pack.mjs` 的 `ZIP_NAME`、README/INSTALL 里的包名。
 
 **线上探活**：`curl -s -X POST http://<Karin 主机>:7777/api/v1/astrbot/commands -H "Authorization: Bearer $T" -d '{}' | head -c 300`
